@@ -2,6 +2,7 @@
   "name": "open_module/php-calendar",
   "description": "Global calendar like carbon for every calendar like Persian , Higri and Gregorian",
   "type": "library",
+  "version": "1.0.0",
   "require": {
     "php": ">=8.0",
     "nesbot/carbon": "^3.10"
