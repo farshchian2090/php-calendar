@@ -178,6 +178,9 @@ class HijriCalendar extends BaseCalendar implements CalendarInterface
         $year = $cal->get(IntlCalendar::FIELD_YEAR);
         $month = $cal->get(IntlCalendar::FIELD_MONTH);
         if (in_array($year, array_keys(static::$specialDays))) {
+            if($month==0){
+                $month=1;
+            }
             return static::$specialDays[$year][$month - 1];
         }
         return $cal->getActualMaximum(IntlCalendar::FIELD_DAY_OF_MONTH);
