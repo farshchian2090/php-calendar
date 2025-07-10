@@ -4,10 +4,10 @@ namespace OpenModule\PhpCalendar\Calendars;
 
 class GregorianCalendar extends BaseCalendar implements CalendarInterface
 {
-    public function __construct()
+    public function __construct($timezone='UTC')
     {
-        parent::__construct();
-        $this->calendar = \IntlCalendar::createInstance(locale: 'en@calendar=gregorian');
+        parent::__construct($timezone);
+        $this->calendar = \IntlCalendar::createInstance($timezone, 'en@calendar=gregorian');
     }
 
     public function isLeapYear(): bool

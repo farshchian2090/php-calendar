@@ -5,11 +5,12 @@ namespace OpenModule\PhpCalendar\Calendars;
 use OpenModule\PhpCalendar\Exceptions\DatetimeInvalidException;
 use Carbon\Carbon;
 use IntlCalendar;
+use OpenModule\PhpCalendar\Helpers\Helper;
 use Throwable;
 
 abstract class BaseCalendar implements CalendarInterface
 {
-    public ?string          $date;
+    public ?string         $date;
     protected IntlCalendar $calendar;
 
     public int $year       = 0;
@@ -19,19 +20,24 @@ abstract class BaseCalendar implements CalendarInterface
     public int $minutes    = 0;
     public int $seconds    = 0;
 
+    public string $timezone = 'UTC';
+
     protected const BASE_CONVERSION = [
         PersianCalendar::class   => '1397-07-19',
         HijriCalendar::class     => '1440-02-01',
         GregorianCalendar::class => '2018-10-11'
     ];
 
-    public function __construct()
+    public function __construct(string $timezone = 'UTC')
     {
+        $this->timezone = $timezone;
     }
 
-    public function setCalendar(): static
+    public function setCalendar($timezone = 'UTC'): static
     {
         $this->calendar->set($this->year, $this->month - 1, $this->dayOfMonth, $this->hours, $this->minutes, $this->seconds);
+        $this->calendar->setTimezone($timezone);
+        $this->timezone = $timezone;
         return $this;
     }
 
@@ -44,17 +50,30 @@ abstract class BaseCalendar implements CalendarInterface
      * @throws DatetimeInvalidException
      * @throws Throwable
      */
-    public function setDate(string $date): CalendarInterface
+    public function setDate(string $date, $timezone = 'UTC'): CalendarInterface
     {
         $this->date = $date;
         $res = preg_match('/^(\d{4})\W(0[1-9]|1[012]|[1-9])\W(0[1-9]|[1,2][0-9]|3[01]|[1-9])\s?(([0-1][0-9]|2[0-3]|[0-9])\W([0-5][0-9]|[0-9])\W([0-5][0-9]|[0-9]))?$/', $date, $parts);
-        if (!$res){
+        if (!$res) {
             throw new DatetimeInvalidException();
         }
         [$this->year, $this->month, $this->dayOfMonth, $this->hours, $this->minutes, $this->seconds] =
-            [(int)$parts[1] ?? 0, (int)$parts[2] ?? 0, (int)$parts[3] ?? 0, (int)$parts[4] ?? 0, (int)$parts[5] ?? 0, (int)$parts[6] ?? 0];
-        $this->setCalendar();
+            [Helper::option($parts, 1, 0), Helper::option($parts, 2, 0), Helper::option($parts, 3, 0), Helper::option($parts, 4, 0), Helper::option($parts, 5, 0), Helper::option($parts, 6, 0)];
+        $this->setCalendar($timezone);
         return $this;
+    }
+
+    public function timezone($timezone = 'UTC'): CalendarInterface
+    {
+        $this->calendar->setTimeZone($timezone);
+        $this->timezone = $timezone;
+        $this->setDateFromCalendar();
+        return $this;
+    }
+
+    public function getTimezone(): string
+    {
+        return $this->timezone;
     }
 
     public function getYear(): int
@@ -284,14 +303,18 @@ abstract class BaseCalendar implements CalendarInterface
      */
     public function to(CalendarInterface $calendar): CalendarInterface
     {
-        if ($calendar instanceof $this){
+        if ($calendar instanceof $this) {
             return $this;
         }
         $baseFrom = self::BASE_CONVERSION[$this::class];
         $baseTo = self::BASE_CONVERSION[$calendar::class];
-        $diffDays=$this->diffInDays($this::fromDate($baseFrom));
-        $calendar->setDate($baseTo);
+        [$hour, $min, $sec] = [$this->getHours(), $this->getMinutes(), $this->getSeconds()];
+        $diffDays = $this->diffInDays($this::fromDate($baseFrom, $this->timezone));
+        $calendar->setDate($baseTo, $calendar->timezone);
         $calendar->addDays($diffDays);
+        $calendar->setHours($hour);
+        $calendar->setMinutes($min);
+        $calendar->setSeconds($sec);
         return $calendar;
     }
 
@@ -313,12 +336,12 @@ abstract class BaseCalendar implements CalendarInterface
         throw new DatetimeInvalidException();
     }
 
-    public static function fromDate(CalendarInterface|string $date): CalendarInterface
+    public static function fromDate(CalendarInterface|string $date, $timezone = 'UTC'): CalendarInterface
     {
         if ($date instanceof CalendarInterface) {
             return $date->clone();
         }
-        return (new static())->setDate($date);
+        return (new static($timezone))->setDate($date, $timezone);
     }
 
     public static function getRange($start, $end): array
@@ -422,9 +445,11 @@ abstract class BaseCalendar implements CalendarInterface
     /**
      * @throws DatetimeInvalidException
      */
-    public static function now(): static
+    public static function now($timezone = 'UTC'): static
     {
         $instance = new static();
+        $instance->calendar->setTimeZone($timezone);
+        $instance->timezone = $timezone;
         $instance->setTime(\IntlCalendar::getNow());
         return $instance;
     }

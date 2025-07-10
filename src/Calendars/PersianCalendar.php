@@ -4,10 +4,10 @@ namespace OpenModule\PhpCalendar\Calendars;
 
 class PersianCalendar extends BaseCalendar implements CalendarInterface
 {
-    public function __construct()
+    public function __construct($timezone='UTC')
     {
-        parent::__construct();
-        $this->calendar = \IntlCalendar::createInstance(locale: 'en@calendar=persian');
+        parent::__construct($timezone);
+        $this->calendar = \IntlCalendar::createInstance($timezone, 'en@calendar=persian');
     }
 
     public function isLeapYear(): bool

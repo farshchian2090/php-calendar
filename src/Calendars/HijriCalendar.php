@@ -45,10 +45,10 @@ class HijriCalendar extends BaseCalendar implements CalendarInterface
         1470 => [30, 29, 29, 30, 30, 29, 30, 29, 30, 30, 30, 29],
     ];
 
-    public function __construct()
+    public function __construct($timezone='UTC')
     {
-        parent::__construct();
-        $this->calendar = IntlCalendar::createInstance(locale: 'en@calendar=islamic');
+        parent::__construct($timezone);
+        $this->calendar = IntlCalendar::createInstance($timezone, 'en@calendar=islamic');
     }
 
     public function toCarbon(): Carbon
@@ -57,9 +57,11 @@ class HijriCalendar extends BaseCalendar implements CalendarInterface
         return parent::toCarbon();
     }
 
-    public static function now(): static
+    public static function now($timezone = null): static
     {
-        return parent::now()->addDays(-1);
+        $calendar=parent::now($timezone);
+        $calendar->checkAddOrSubDay();
+        return $calendar;
     }
 
     public function isLeapYear(): bool

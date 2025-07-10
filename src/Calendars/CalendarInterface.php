@@ -6,6 +6,10 @@ use Carbon\Carbon;
 
 interface CalendarInterface
 {
+
+    public function timezone($timezone='UTC'): CalendarInterface;
+
+    public function getTimezone();
     public function getDate(): ?string;
 
     public function setDate(string $date): CalendarInterface;
