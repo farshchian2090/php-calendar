@@ -12,7 +12,7 @@ interface CalendarInterface
     public function getTimezone();
     public function getDate(): ?string;
 
-    public function setDate(string $date): CalendarInterface;
+    public function setDate(string $date,$timezone = 'UTC'): CalendarInterface;
 
     public function addDay(): CalendarInterface;
 
@@ -60,7 +60,7 @@ interface CalendarInterface
 
     public function getEndOfMonth(): CalendarInterface;
 
-    public function getStatOfYear(): CalendarInterface;
+    public function getStartOfYear(): CalendarInterface;
 
     public function getEndOfYear(): CalendarInterface;
 
@@ -88,7 +88,7 @@ interface CalendarInterface
      */
     public function setTime(float $time): CalendarInterface;
 
-    public static function fromDate(string|CalendarInterface $date): CalendarInterface;
+    public static function fromDate(string|CalendarInterface $date,$timezone = 'UTC'): CalendarInterface;
 
     public static function getRange($start, $end): array;
 
@@ -107,7 +107,7 @@ interface CalendarInterface
 
     public function toCarbon():Carbon;
 
-    public static function now(): static;
+    public static function now($timezone = 'UTC'): static;
 
     public function lt(CalendarInterface $calendar): bool;
 

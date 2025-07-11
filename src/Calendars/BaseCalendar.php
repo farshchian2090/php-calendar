@@ -245,7 +245,7 @@ abstract class BaseCalendar implements CalendarInterface
      * get the start of year by specific calendar
      * @return CalendarInterface
      */
-    public function getStatOfYear(): CalendarInterface
+    public function getStartOfYear(): CalendarInterface
     {
         $calendarCopy = $this->clone();
         $calendar = $calendarCopy->calendar;
