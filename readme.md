@@ -10,6 +10,10 @@ Using this package, you can easily convert Gregorian, solar, and hijri dates to 
 composer require open_module/php-calendar
 ```
 
+### requirements:
+- PHP 8.0 or later
+- enable Intl extension of php
+
 ### **How to use:**
 
 ```php
